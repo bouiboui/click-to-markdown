@@ -1,0 +1,10 @@
+/* Styles for Click to Markdown extension */
+/* These styles are injected via content script but kept here for reference */
+
+/* The overlay and toast are created in Shadow DOM via content.js */
+/* This file is included for completeness but most styles are inline in content.js */
+
+/* Additional page-level styles if needed */
+#click-to-markdown-container {
+  all: initial;
+}
