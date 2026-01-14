@@ -33,9 +33,15 @@ if (manifest.version !== VERSION) {
 // Extension name and output file
 const EXT_NAME = 'click-to-markdown';
 const OUTPUT_FILE = `${EXT_NAME}-v${VERSION}.zip`;
-const OUTPUT_PATH = path.join(__dirname, OUTPUT_FILE);
+const releasesDir = path.join(__dirname, 'releases');
+const OUTPUT_PATH = path.join(releasesDir, OUTPUT_FILE);
 
 console.log(blue('Packaging Click to Markdown extension...'));
+
+// Create releases directory if it doesn't exist
+if (!fs.existsSync(releasesDir)) {
+  fs.mkdirSync(releasesDir, { recursive: true });
+}
 
 // Remove existing zip if it exists
 if (fs.existsSync(OUTPUT_PATH)) {
@@ -89,6 +95,7 @@ copyRecursive(path.join(__dirname, 'src'), distPath);
   output.on('close', () => {
     const fileSize = (archive.pointer() / 1024).toFixed(2);
     console.log(green(`✓ Package created successfully: ${OUTPUT_FILE}`));
+    console.log(blue(`File location: releases/${OUTPUT_FILE}`));
     console.log(blue(`File size: ${fileSize} KB`));
     console.log(blue('Ready for store submission!'));
     resolve();
