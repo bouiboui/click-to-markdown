@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Click to Markdown</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+    .icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .instructions {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 30px 0;
+      text-align: left;
+    }
+    .instructions h2 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    .step:last-child {
+      margin-bottom: 0;
+    }
+    .step-number {
+      background: #667eea;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-right: 15px;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .step-content strong {
+      color: #333;
+      display: block;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+    .step-content p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .highlight {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      color: #856404;
+      font-size: 14px;
+    }
+    .highlight-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+    .button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      margin-top: 20px;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    }
+    .button:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📋</div>
+    <h1>Welcome to Click to Markdown!</h1>
+    <p class="subtitle">Get started by pinning the extension to your toolbar</p>
+    
+    <div class="instructions">
+      <h2>How to Pin the Extension</h2>
+      
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <strong>Click the puzzle piece icon</strong>
+          <p>Look for the puzzle piece icon (🧩) in your Chrome toolbar, usually in the top-right corner next to your profile picture.</p>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <strong>Find "Click to Markdown"</strong>
+          <p>In the extensions menu that appears, locate "Click to Markdown" in the list of installed extensions.</p>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <strong>Click the pin icon</strong>
+          <p>Click the pin icon (📌) next to "Click to Markdown" to pin it to your toolbar. The extension icon will now appear directly in your toolbar for quick access!</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="highlight">
+      <span class="highlight-icon">💡</span>
+      <strong>Why pin it?</strong> Pinning the extension makes it much easier to access. Instead of opening the extensions menu every time, you can click the icon directly from your toolbar.
+    </div>
+    
+    <button class="button" id="gotItBtn">Got it!</button>
+  </div>
+  
+  <script src="onboarding.js"></script>
+</body>
+</html>

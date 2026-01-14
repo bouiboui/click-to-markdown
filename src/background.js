@@ -1,9 +1,16 @@
 // Service worker for Click to Markdown extension
 // Handles state synchronization across tabs
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   // Initialize storage
   chrome.storage.local.set({ inspectorActive: false });
+  
+  // Show onboarding page on first install
+  if (details.reason === 'install') {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('onboarding.html')
+    });
+  }
 });
 
 // Listen for tab updates to inject content script if needed
