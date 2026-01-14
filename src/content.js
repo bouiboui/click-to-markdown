@@ -204,11 +204,14 @@
   async function handleClick(e) {
     if (!inspectorActive) return;
 
+    // Prevent default behavior and stop propagation immediately
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    const element = e.target;
+    // Use highlightedElement if available (what user is hovering over),
+    // otherwise fall back to e.target
+    const element = highlightedElement || e.target;
     if (!element) return;
 
     // Convert to Markdown
@@ -247,14 +250,15 @@
   function addEventListeners() {
     document.addEventListener('mouseover', handleMouseOver, true);
     document.addEventListener('mouseout', handleMouseOut, true);
-    document.addEventListener('click', handleClick, true);
+    // Use mousedown instead of click to fire before popup closes
+    document.addEventListener('mousedown', handleClick, true);
   }
 
   // Remove event listeners
   function removeEventListeners() {
     document.removeEventListener('mouseover', handleMouseOver, true);
     document.removeEventListener('mouseout', handleMouseOut, true);
-    document.removeEventListener('click', handleClick, true);
+    document.removeEventListener('mousedown', handleClick, true);
   }
 
   // Toggle inspector mode

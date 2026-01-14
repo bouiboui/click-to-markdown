@@ -1,0 +1,17 @@
+{
+  "name": "click-to-markdown",
+  "version": "1.0.0",
+  "description": "Chrome Extension that allows you to toggle an Inspector Mode to click any element and copy its content as Markdown",
+  "scripts": {
+    "build": "node build.js",
+    "package": "node build.js",
+    "version:patch": "node bump-version.js patch",
+    "version:minor": "node bump-version.js minor",
+    "version:major": "node bump-version.js major"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "chalk": "^5.3.0"
+  },
+  "type": "module"
+}
