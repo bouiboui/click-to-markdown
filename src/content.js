@@ -21,6 +21,17 @@
       
       const container = document.createElement('div');
       container.id = 'click-to-markdown-container';
+      // Position container as fixed with zero dimensions to avoid creating
+      // a positioning context that interferes with fixed elements inside shadow DOM
+      container.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        z-index: 2147483647;
+      `;
       document.body.appendChild(container);
       shadowRoot = container.attachShadow({ mode: 'closed' });
     }
@@ -125,8 +136,8 @@
 
     const rect = element.getBoundingClientRect();
     overlay.style.display = 'block';
-    overlay.style.left = `${rect.left + window.scrollX}px`;
-    overlay.style.top = `${rect.top + window.scrollY}px`;
+    overlay.style.left = `${rect.left}px`;
+    overlay.style.top = `${rect.top}px`;
     overlay.style.width = `${rect.width}px`;
     overlay.style.height = `${rect.height}px`;
   }
