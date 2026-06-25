@@ -8,6 +8,16 @@ releases/
 # Dependencies
 node_modules/
 
+# Tool caches and test output
+.cache/
+.turbo/
+coverage/
+playwright-report/
+test-results/
+
 # Logs
 *.log
 npm-debug.log*
+
+# Temporary files
+*.tmp
