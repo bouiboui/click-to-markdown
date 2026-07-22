@@ -3,175 +3,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   const status = document.getElementById('status');
   const warning = document.getElementById('warning');
   const reloadBtn = document.getElementById('reloadBtn');
+  const settingsLink = document.getElementById('settingsLink');
 
-  // Inject content scripts dynamically
   async function injectContentScripts(tabId) {
     try {
-      // Check if scripts are already injected
-      try {
-        const response = await chrome.tabs.sendMessage(tabId, { action: 'ping' });
-        if (response && response.ready === true) {
-          return true; // Already injected
-        }
-      } catch (e) {
-        // Scripts not injected yet, continue to inject
-      }
-
-      // Inject CSS first
-      await chrome.scripting.insertCSS({
-        target: { tabId: tabId },
-        files: ['styles.css']
-      });
-
-      // Inject JavaScript files in order
-      await chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ['lib/turndown.js']
-      });
-
-      await chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ['content.js']
-      });
-
-      // Wait a bit for scripts to initialize
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Verify injection
-      const response = await chrome.tabs.sendMessage(tabId, { action: 'ping' });
-      return response && response.ready === true;
-    } catch (error) {
-      console.error('Error injecting content scripts:', error);
-      return false;
-    }
+      try { if ((await chrome.tabs.sendMessage(tabId, { action: 'ping' }))?.ready) return true; } catch (_) { /* Inject below. */ }
+      await chrome.scripting.insertCSS({ target: { tabId }, files: ['styles.css'] });
+      await chrome.scripting.executeScript({ target: { tabId }, files: ['lib/turndown.js'] });
+      await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+      return Boolean((await chrome.tabs.sendMessage(tabId, { action: 'ping' }))?.ready);
+    } catch (error) { console.error('Click to Markdown: injection failed', error); return false; }
   }
-
-  // Check if content script is available
-  async function checkContentScriptAvailable() {
-    try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab.id) return false;
-      
-      // Skip check for chrome:// and other special pages
-      if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('moz-extension://'))) {
-        return false;
-      }
-
-      // Try to inject scripts if not available
-      const injected = await injectContentScripts(tab.id);
-      if (!injected) {
-        return false;
-      }
-
-      const response = await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
-      return response && response.ready === true;
-    } catch (error) {
-      // Content script not available
-      return false;
-    }
-  }
-
-  // Get current state
-  const result = await chrome.storage.local.get(['inspectorActive']);
-  const isActive = result.inspectorActive || false;
-
-  // Check content script availability
-  const scriptAvailable = await checkContentScriptAvailable();
-  updateUI(isActive, scriptAvailable);
-
-  toggleBtn.addEventListener('click', async () => {
-    try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab.id) {
-        updateUI(isActive, false);
-        return;
-      }
-
-      // Skip for special pages
-      if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('moz-extension://'))) {
-        updateUI(isActive, false);
-        return;
-      }
-
-      // Inject scripts if needed
-      const scriptAvailable = await injectContentScripts(tab.id);
-      if (!scriptAvailable) {
-        updateUI(isActive, false);
-        return;
-      }
-
-      const result = await chrome.storage.local.get(['inspectorActive']);
-      const newState = !result.inspectorActive;
-
-      // Update storage
-      await chrome.storage.local.set({ inspectorActive: newState });
-
-      // Send message to content script
-      await chrome.tabs.sendMessage(tab.id, {
-        action: 'toggleInspector',
-        active: newState
-      });
-      
-      updateUI(newState, true);
-      
-      // Close popup after toggling inspector on to prevent two-click issue
-      if (newState === true) {
-        setTimeout(() => {
-          window.close();
-        }, 100);
-      }
-    } catch (error) {
-      console.error('Error toggling inspector:', error);
-      updateUI(isActive, false);
-    }
-  });
-
-  // Reload page button
-  reloadBtn.addEventListener('click', async () => {
+  async function activeTab() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab.id) {
-      chrome.tabs.reload(tab.id);
-      window.close();
-    }
-  });
-
+    return tab?.id && !/^(chrome|chrome-extension|moz-extension):/.test(tab.url || '') ? tab : null;
+  }
   function updateUI(isActive, scriptAvailable = true) {
     if (!scriptAvailable) {
-      // Show warning state
-      toggleBtn.disabled = true;
-      toggleBtn.style.opacity = '0.6';
-      toggleBtn.style.cursor = 'not-allowed';
-      status.textContent = 'Inspector: Unavailable';
-      status.style.color = '#856404';
-      warning.classList.add('show');
-      reloadBtn.style.display = 'block';
-      return;
+      toggleBtn.disabled = true; toggleBtn.style.opacity = '0.6';
+      status.textContent = 'Capture: Unavailable'; status.style.color = '#856404';
+      warning.classList.add('show'); reloadBtn.style.display = 'block'; return;
     }
-
-    // Normal state
-    toggleBtn.disabled = false;
-    toggleBtn.style.opacity = '1';
-    toggleBtn.style.cursor = 'pointer';
-    warning.classList.remove('show');
-    reloadBtn.style.display = 'none';
-
-    if (isActive) {
-      toggleBtn.textContent = 'Turn Off Inspector';
-      toggleBtn.className = 'toggle-button active';
-      status.textContent = 'Inspector: On';
-      status.style.color = '#666';
-    } else {
-      toggleBtn.textContent = 'Toggle Inspector';
-      toggleBtn.className = 'toggle-button inactive';
-      status.textContent = 'Inspector: Off';
-      status.style.color = '#666';
-    }
+    toggleBtn.disabled = false; toggleBtn.style.opacity = '1';
+    toggleBtn.textContent = isActive ? 'Cancel Capture' : 'Start Capture';
+    toggleBtn.className = `toggle-button ${isActive ? 'active' : 'inactive'}`;
+    status.textContent = isActive ? 'Click an element or drag an area' : 'Capture: Off';
+    status.style.color = '#666'; warning.classList.remove('show'); reloadBtn.style.display = 'none';
+  }
+  async function toggleCapture() {
+    const tab = await activeTab();
+    if (!tab || !(await injectContentScripts(tab.id))) return updateUI(false, false);
+    const { inspectorActive = false } = await chrome.storage.local.get('inspectorActive');
+    const active = !inspectorActive;
+    await chrome.storage.local.set({ inspectorActive: active });
+    await chrome.tabs.sendMessage(tab.id, { action: 'toggleInspector', active });
+    updateUI(active);
+    if (active) setTimeout(() => window.close(), 100);
   }
 
-  // Listen for state changes from content script
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'inspectorStateChanged') {
-      updateUI(message.active, true);
-    }
-  });
+  const tab = await activeTab();
+  const available = Boolean(tab && await injectContentScripts(tab.id));
+  const { inspectorActive = false } = await chrome.storage.local.get('inspectorActive');
+  updateUI(inspectorActive, available);
+  toggleBtn.addEventListener('click', () => toggleCapture().catch((error) => { console.error(error); updateUI(false, false); }));
+  reloadBtn.addEventListener('click', async () => { const current = await activeTab(); if (current) { chrome.tabs.reload(current.id); window.close(); } });
+  settingsLink.addEventListener('click', (event) => { event.preventDefault(); chrome.runtime.openOptionsPage(); });
+  chrome.runtime.onMessage.addListener((message) => { if (message.action === 'inspectorStateChanged') updateUI(message.active); });
 });

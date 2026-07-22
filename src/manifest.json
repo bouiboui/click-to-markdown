@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Click to Markdown",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Toggle inspector mode to click any element and copy its content as Markdown",
   "permissions": [
     "activeTab",
@@ -18,6 +18,16 @@
   },
   "background": {
     "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "commands": {
+    "toggle-capture": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Start or cancel a Markdown capture"
+    }
   },
   "icons": {
     "16": "icon16.png",
