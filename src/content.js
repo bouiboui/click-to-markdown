@@ -61,9 +61,56 @@
   }
 
   function htmlToMarkdown(element) {
-    if (typeof TurndownService === 'undefined') return '';
-    try { return new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' }).turndown(element); }
-    catch (error) { console.error('Click to Markdown: conversion failed', error); return ''; }
+    if (typeof TurndownService === 'undefined' || !element) return '';
+    try {
+      const fragment = document.createElement('div');
+      fragment.appendChild(element.cloneNode(true));
+      fragment.querySelectorAll('script,style,noscript,template').forEach(node => node.remove());
+      // Detached drag fragments otherwise lose the page's base URL.
+      for (const node of fragment.querySelectorAll('*')) {
+        for (const attribute of [...node.attributes]) {
+          if (/^on/i.test(attribute.name)) node.removeAttribute(attribute.name);
+        }
+        for (const attribute of ['href', 'src']) {
+          if (!node.hasAttribute(attribute)) continue;
+          try {
+            const url = new URL(node.getAttribute(attribute), document.baseURI);
+            if (/^(https?:|mailto:|tel:)$/.test(url.protocol)) node.setAttribute(attribute, url.href);
+            else node.removeAttribute(attribute);
+          } catch { node.removeAttribute(attribute); }
+        }
+      }
+      const converter = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' });
+      converter.addRule('selectedTable', {
+        filter: 'table',
+        replacement: (_content, table) => {
+          const rows = [...table.rows];
+          if (!rows.length) return '';
+          // Markdown cannot represent merged cells or nested tables faithfully.
+          if (table.querySelector('table, [colspan]:not([colspan="1"]), [rowspan]:not([rowspan="1"])')) {
+            const allowed = new Set(['href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'scope']);
+            for (const node of [table, ...table.querySelectorAll('*')]) {
+              for (const attribute of [...node.attributes]) {
+                if (!allowed.has(attribute.name)) node.removeAttribute(attribute.name);
+              }
+            }
+            return '\n\n' + table.outerHTML + '\n\n';
+          }
+          const width = Math.max(...rows.map(row => row.cells.length));
+          const line = cells => '| ' + Array.from({ length: width }, (_, index) => cells[index] || '').join(' | ') + ' |';
+          const values = rows.map(row => [...row.cells].map(cell => converter.turndown(cell.innerHTML)
+            .trim().replace(/\|/g, '\\|').replace(/\n+/g, '<br>')));
+          const hasHeader = [...rows[0].cells].every(cell => cell.tagName === 'TH');
+          const header = hasHeader ? values.shift() : [];
+          const caption = table.caption ? converter.turndown(table.caption.innerHTML) + '\n\n' : '';
+          return '\n\n' + caption + [line(header), line(Array(width).fill('---')), ...values.map(line)].join('\n') + '\n\n';
+        },
+      });
+      const markdown = converter.turndown(fragment).trim();
+      if (!markdown) return '';
+      const title = (document.title || 'Original page').replace(/[\r\n]+/g, ' ').replace(/([\\\[\]])/g, '\\$1');
+      return `${markdown}\n\nSource: [${title}](<${location.href.replace(/>/g, '%3E')}>)`;
+    } catch (error) { console.error('Click to Markdown: conversion failed', error); return ''; }
   }
   function rectsIntersect(a, b) { return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }
   function textIntersectsSelection(node, selectionRect) {

@@ -130,3 +130,9 @@ This extension uses:
 For issues or questions, please check:
 - Chrome Extension documentation: https://developer.chrome.com/docs/extensions/
 - Turndown.js documentation: https://github.com/domchristie/turndown
+
+## Fragment fidelity, local changes
+
+Click and rectangular captures now include a source link. Relative links and images resolve against the original page, including its base URL. Simple tables become Markdown tables; merged cells and nested tables remain cleaned HTML because Markdown cannot preserve their structure. No service, transmission or capture option was added.
+
+On 30 October 2026, six DOM checks ran the actual bundled converter and content-script pointer handlers: element and rectangular capture, source attribution, absolute references, simple/headerless/merged tables, successful auto-disable and failed-copy retry. JavaScript syntax checking passed. These checks use simulated geometry and browser APIs; actual Chrome popup/highlight/drag behavior and packaging remain unverified. The changes have not been submitted to the store.
